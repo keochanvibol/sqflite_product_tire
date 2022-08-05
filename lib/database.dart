@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:app_tireproduct/datamodel/product.dart';
+import 'package:app_tireproduct/datamodel/producttire.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -37,7 +38,7 @@ class DatabaseHelpe {
         FOREIGN KEY(product id) REFERENCES product(id) ON DELETE NO ACTION ON UPDATE NO ACTION)''');
   }
 
-  //insert and updating
+  //insert and updating product
   Future<Product> upserProduct(Product product) async {
     Database db = await instance.database;
     var count = Sqflite.firstIntValue(await db.rawQuery(
@@ -49,5 +50,20 @@ class DatabaseHelpe {
           where: "pid = ?", whereArgs: [product.pid]);
     }
     return product;
+  }
+
+  //insert and updating product tire
+  Future<ProductTire> upserProductTire(ProductTire productTire) async {
+    Database db = await instance.database;
+    var count = Sqflite.firstIntValue(await db.rawQuery(
+        "SELECT COUNT(*) FROM productTire WHERE ptid = ?", [productTire.ptid]));
+    if (count == 0) {
+      await db.insert("productTire", productTire.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } else {
+      await db.update("productTire", productTire.toMap(),
+          where: "ptid = ?", whereArgs: [productTire.ptid]);
+    }
+    return productTire;
   }
 }
